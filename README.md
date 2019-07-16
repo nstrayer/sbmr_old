@@ -11,5 +11,5 @@ To run the current 'tests' for the `Node` class you can compile and run with:
 ```bash
 cd cpp/
 g++ -o compiled/test_Node test_Node.cpp Node.cpp
- ./compiled/test_Node
+./compiled/test_Node
 ```
