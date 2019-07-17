@@ -1,12 +1,9 @@
 // [[Rcpp::plugins(cpp11)]]
-// #include <Rcpp.h>
-// #include <iostream>
-
+#include <Rcpp.h>
 #include <random>
-#include <map>
 #include "Node.h" 
 
-// using namespace Rcpp;
+using namespace Rcpp;
 using std::string;
 using std::vector;
 using std::map;
@@ -15,21 +12,29 @@ using std::map;
 std::random_device rand_dev;
 std::mt19937 generator(rand_dev());
 
+// Define an edge map for ease of reading
+typedef map<string, Edge> EdgeMap;
+
 
 // =======================================================
 // Constructor that takes the nodes unique id integer and type
 // =======================================================
-Node::Node(int node_id, bool type_a){
-  id = node_id;
-  is_type_a = type_a;
-  degree = 0;
-}
+// Node::Node():
+//   id('Init'),
+//   is_type_a(true),
+//   degree(0){}
+
+Node::Node(string node_id, bool type_a):
+  id(node_id),
+  is_type_a(type_a),
+  degree(0){}
+
 
 // =======================================================
 // Add connection to edge map
 // =======================================================
 void Node::add_edge(Node* node_ptr) {
-  map<int, Edge>::iterator edge_to_add;
+  EdgeMap::iterator edge_to_add;
   
   // Try and find the node in edges.
   edge_to_add = edges.find(node_ptr->id);
@@ -59,7 +64,7 @@ void Node::add_edge(Node* node_ptr) {
 void Node::remove_edge(Node* node_ptr, bool remove_all){
   int num_edges;
   bool single_edge;
-  map<int, Edge>::iterator edge_to_delete;
+  EdgeMap::iterator edge_to_delete;
   
   // Try and find the node in edges.
   edge_to_delete = edges.find(node_ptr->id);
@@ -89,7 +94,7 @@ void Node::remove_edge(Node* node_ptr, bool remove_all){
 // How many total edges to another node?
 // =======================================================
 int Node::num_edges_to_node(Node* node_ptr){
-  map<int, Edge>::iterator edge_to_find;
+  EdgeMap::iterator edge_to_find;
 
   // Try and find the node in edges.
   edge_to_find = edges.find(node_ptr->id);
@@ -112,7 +117,7 @@ Node* Node::get_random_neighbor(){
   std::uniform_int_distribution<int> distr(0, edges.size()-1); 
   int random_map_index = distr(generator);
   
-  map<int, Edge>::iterator edge_grabber = edges.begin();
+  EdgeMap::iterator edge_grabber = edges.begin();
   std::advance(edge_grabber, random_map_index);
   
   return edge_grabber->second.node;
@@ -146,37 +151,16 @@ void Node::swap_clusters(Node* new_cluster_ptr){
 // =======================================================
 // Get how many edges to all represented neighbor clusters
 // =======================================================
-vector<Edge> Node::num_edges_to_clusters(){
-  map<int, Edge>::iterator   edges_it;          // Iterator for going through all edges
-  map<Node*, int>            clust_counts_map;  // Keep track of cluster counts for seen clusters
-  map<Node*, int>::iterator  counts_map_it;     // Iterator for looping trhough cluster counts
-  Node*                      edge_cluster;      // Pointer to current edge's cluster
-  int                        i = 0;             // Keeps track of iteration progress
-  vector<Edge>               clust_counts_vec;  // Returned vector of cluster edges
+vector<string> Node::neighbor_clusters(){
+  EdgeMap::iterator  edges_it;             // Iterator for going through all edges
+  vector<string>               neighbor_clusters;    // Returned vector of neighbor cluster ids
   
-  // Go through all edges and count cluster occurances
-  for(edges_it = edges.begin(); edges_it != edges.end(); ++edges_it){
-    // Grab current cluster pointer from iterator
-    edge_cluster = edges_it->second.node->cluster;
-    
-    // Increment the counts
-    clust_counts_map[edge_cluster]++;
+  neighbor_clusters.reserve(edges.size());
+  for(edges_it = edges.begin(); edges_it != edges.end(); edges_it++){
+    neighbor_clusters.push_back(edges_it->second.node->cluster->id);
   }
-  
-  // Preallocate return vector size
-  clust_counts_vec.reserve(clust_counts_map.size());
-  
-  // Loop through map to construct vector to return
-  for(counts_map_it = clust_counts_map.begin(); counts_map_it != clust_counts_map.end(); ++counts_map_it){
-    
-    // First fill in the cluster node pointer value
-    clust_counts_vec[i].node = counts_map_it->first;
-    
-    // Then fill in the counts to that cluster
-    clust_counts_vec[i].count = counts_map_it->second;
-  }
-  
-  return clust_counts_vec;
+ 
+  return neighbor_clusters;
 }
 
 
@@ -190,56 +174,51 @@ void Node::connect_nodes(Node* node_a_ptr, Node* node_b_ptr){
 }
 
 
-// // [[Rcpp::export]]
-// List make_node_and_print(
-//     bool add_edge, 
-//     bool remove_all_edges
-// ){
-//   Node node_a(1, true),
-//        node_b(2, false),
-//        node_c(3, true),
-//        clust_a(4, true),
-//        clust_b(5, true);
+// [[Rcpp::export]]
+List make_node_and_print(
+    bool swap_clusters
+){
+  Node node_a("n1", true),
+       node_b("n2", false),
+       node_c("n3", true),
+       node_d("n4", true),
+       clust_a("c1", true),
+       clust_b("c2", true);
 
-//   node_a.add_edge(&node_b);
-//   node_a.add_edge(&node_b);
-//   node_a.add_edge(&node_c);
-//   // 
-//   // Add members to cluster node
-//   // clust_a.add_member(&node_a);
-//   // clust_a.add_member(&node_b);
-//   // clust_b.add_member(&node_c);
+  Node::connect_nodes(&node_a, &node_b);
+  Node::connect_nodes(&node_a, &node_c);
+  Node::connect_nodes(&node_a, &node_d);
+  Node::connect_nodes(&node_b, &node_c);
   
-//   // vector<Edge> 
+  // Add members to cluster node
+  clust_a.add_member(&node_a);
+  clust_a.add_member(&node_b);
+  clust_b.add_member(&node_c);
+  clust_b.add_member(&node_d);
   
-//   // if(add_edge){
-//   // }
-//   // 
-//   // // Add members to cluster node
-//   // clust_a.add_member(&node_a);
-//   // clust_a.add_member(&node_b);
-//   // 
-//   // 
-//   // if(remove_all_edges){
-//   //   node_a.swap_clusters(&clust_b);
-//   //   node_a.remove_edge(&node_b, true);
-//   // } else{
-//   //   node_a.remove_edge(&node_b, false);
-//   // }
+  if(swap_clusters){
+    node_a.swap_clusters(&clust_b);
+  }
   
-//   return List::create(
-//     _["id"] = node_a.id,
-//     _["degree"] = node_a.degree,
-//     _["edges_to_b"] = node_a.num_edges_to_node(&node_b),
-//     _["random_neighbor_id"] = node_a.get_random_neighbor()->id,
-//     _["node_a_cluster"] = node_a.cluster->id,
-//     _["clust_a_n_members"] = clust_a.members.size()
-//   );
-// }
+  
+  return List::create(
+    _["id"]                 = node_a.id,
+    _["cluster"]            = node_a.cluster->id,
+    _["degree"]             = node_a.degree,
+    _["num_edges"]          = node_a.edges.size(),
+    _["edges_to_b"]         = node_a.num_edges_to_node(&node_b),
+    _["random_neighbor_id"] = node_a.get_random_neighbor()->id,
+    _["clust_a_n_members"]  = clust_a.members.size(),
+    _["clust_b_n_members"]  = clust_b.members.size(),
+    _["node_b_cluster"]     = node_c.cluster->id,
+    _["neighbor_clusters"]  = node_a.neighbor_clusters()
+  );
+  
+}
 
 
 
 /*** R
-make_node_and_print(TRUE, FALSE)
-make_node_and_print(TRUE, TRUE)
+make_node_and_print(TRUE)
+make_node_and_print(FALSE)
 */
