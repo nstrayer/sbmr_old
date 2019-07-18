@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Node.h" 
+#include "../src/Node.h" 
 
 using namespace std;
 
@@ -23,9 +23,17 @@ int main(){
     clust_b.add_member(&node_c);
     clust_b.add_member(&node_d);
 
-    // Connect some nodes
-    cout << "I'm running!" << endl;
-    cout << "I am running new code, too!" << endl;
+    cout << "======================================" << endl;
+    cout << "node_a.id" << " = " << node_a.id << endl;
+    cout << "node_a.cluster->id" << " = " << node_a.cluster->id << endl;
+    cout << "node_a.degree" << " = " << node_a.degree << endl;
+    cout << "node_a.edges.size()" << " = " << node_a.edges.size() << endl;
+    cout << "node_a.num_edges_to_node(&node_b)" << " = " << node_a.num_edges_to_node(&node_b) << endl;
+    cout << "node_a.get_random_neighbor()->id" << " = " << node_a.get_random_neighbor()->id << endl;
+    cout << "clust_a.members.size()" << " = " << clust_a.members.size() << endl;
+    cout << "clust_b.members.size()" << " = " << clust_b.members.size() << endl;
+    cout << "node_c.cluster->id" << " = " << node_c.cluster->id << endl;
+    // cout << "node_a.neighbor_clusters()" << " = " << node_a.neighbor_clusters() << endl; // is a vector so it cant be printed easily.
    
     return 0;
 }

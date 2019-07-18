@@ -3,3 +3,5 @@ cpp/compiled/
 *.Rhistory
 *.vscode/
 *.Rproj
+BiGraph_test
+Node_test
