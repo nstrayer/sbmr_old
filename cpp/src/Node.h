@@ -1,9 +1,10 @@
-// [[Rcpp::plugins(cpp11)]]
 //=================================
 // include guard
 //=================================
 #ifndef __NODE_INCLUDED__
 #define __NODE_INCLUDED__
+
+#include <map>
 using std::string;
 using std::vector;
 using std::map;
@@ -14,6 +15,7 @@ using std::map;
 //=================================
 class  Node;
 struct Edge;
+
 
 //=================================
 // Edge structure for holding pointer to connected 

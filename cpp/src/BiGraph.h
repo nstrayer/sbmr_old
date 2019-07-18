@@ -1,11 +1,12 @@
-// [[Rcpp::plugins(cpp11)]]
 //=================================
 // include guard
 //=================================
 #ifndef __BIGRAPH_INCLUDED__
 #define __BIGRAPH_INCLUDED__
 
-#include "Node.h" 
+#include<tuple> 
+#include "Node.h"
+
 using std::string;
 using std::tuple;
 using std::vector;

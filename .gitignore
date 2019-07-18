@@ -1,2 +1,5 @@
 cpp/compiled/
 .Rproj.user
+*.Rhistory
+*.vscode/
+*.Rproj

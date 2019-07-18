@@ -1,9 +1,8 @@
-#include <Rcpp.h>
 #include <random>
+#include<tuple> 
 #include "Node.h" 
 #include "BiGraph.h" 
 
-using namespace Rcpp;
 using std::string;
 using std::vector;
 using std::map;
@@ -87,7 +86,8 @@ void BiGraph::remove_node(string name, bool type_a){
 Node* BiGraph::get_node_by_id(string name, bool type_a){
   NodeMap*            map_for_type_ptr;   // Pointer to the correct map for type
   NodeMap::iterator   node_to_find;       // Iterator for finding node
-
+  Node *              node_to_return_ptr; // Pointer for node requested
+  
   // Grab correct node map
   map_for_type_ptr = type_a ? &a_nodes : &b_nodes;
   
@@ -134,27 +134,3 @@ void BiGraph::add_edge(string a_name, string b_name){
 // void                                  BiGraph::cleanup_empty_clusters();       // Removes nodes with no members
 // vector< tuple<string, string> >       BiGraph::take_cluster_snapshot();
 // vector< tuple<string, string, int> >  BiGraph::take_connection_snapshot();
-
-
-
-// [[Rcpp::export]]
-List load_data(vector<string> edges_a, vector<string> edges_b){
-  BiGraph my_bigraph;
-  int n_edges = edges_a.size();
-
-  for(int i = 0; i < n_edges; i++){
-    my_bigraph.add_edge(edges_a[i], edges_b[i]);
-  }
-
-  return List::create(
-    _["n_a_nodes"] = my_bigraph.a_nodes.size(),
-    _["n_b_nodes"] = my_bigraph.b_nodes.size()
-  );
-}
-
-
-
-/*** R
-data <- readr::read_csv('southern_women.csv', col_types = readr::cols(event = 'c', individual = 'c')) 
-load_data(data$event, data$individual)
-*/

@@ -1,9 +1,7 @@
-// [[Rcpp::plugins(cpp11)]]
-#include <Rcpp.h>
 #include <random>
+#include <map>
 #include "Node.h" 
 
-using namespace Rcpp;
 using std::string;
 using std::vector;
 using std::map;
@@ -19,11 +17,6 @@ typedef map<string, Edge> EdgeMap;
 // =======================================================
 // Constructor that takes the nodes unique id integer and type
 // =======================================================
-// Node::Node():
-//   id('Init'),
-//   is_type_a(true),
-//   degree(0){}
-
 Node::Node(string node_id, bool type_a):
   id(node_id),
   is_type_a(type_a),
@@ -172,53 +165,3 @@ void Node::connect_nodes(Node* node_a_ptr, Node* node_b_ptr){
   node_a_ptr->add_edge(node_b_ptr);
   node_b_ptr->add_edge(node_a_ptr);
 }
-
-
-// [[Rcpp::export]]
-List make_node_and_print(
-    bool swap_clusters
-){
-  Node node_a("n1", true),
-       node_b("n2", false),
-       node_c("n3", true),
-       node_d("n4", true),
-       clust_a("c1", true),
-       clust_b("c2", true);
-
-  Node::connect_nodes(&node_a, &node_b);
-  Node::connect_nodes(&node_a, &node_c);
-  Node::connect_nodes(&node_a, &node_d);
-  Node::connect_nodes(&node_b, &node_c);
-  
-  // Add members to cluster node
-  clust_a.add_member(&node_a);
-  clust_a.add_member(&node_b);
-  clust_b.add_member(&node_c);
-  clust_b.add_member(&node_d);
-  
-  if(swap_clusters){
-    node_a.swap_clusters(&clust_b);
-  }
-  
-  
-  return List::create(
-    _["id"]                 = node_a.id,
-    _["cluster"]            = node_a.cluster->id,
-    _["degree"]             = node_a.degree,
-    _["num_edges"]          = node_a.edges.size(),
-    _["edges_to_b"]         = node_a.num_edges_to_node(&node_b),
-    _["random_neighbor_id"] = node_a.get_random_neighbor()->id,
-    _["clust_a_n_members"]  = clust_a.members.size(),
-    _["clust_b_n_members"]  = clust_b.members.size(),
-    _["node_b_cluster"]     = node_c.cluster->id,
-    _["neighbor_clusters"]  = node_a.neighbor_clusters()
-  );
-  
-}
-
-
-
-/*** R
-make_node_and_print(TRUE)
-make_node_and_print(FALSE)
-*/
